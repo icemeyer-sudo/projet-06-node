@@ -1,28 +1,28 @@
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const optimizeImage = (req, res, next) => {
-    if (!req.file) return next();
+    if (!req.file) { return next(); }
 
-    const filename = req.file.filename;
-    const filepath = path.join(__dirname, '../../images', filename);
-    const webpFilepath = filepath.replace(/\.[^.]+$/, '.webp');
+    const filename = req.file.filename; // Récupère le nom du fichier donné par multer en UUID
+    const filepath = path.join(process.cwd(), 'images', filename); // Construit le chemin absolu
+    const webpFilepath = filepath.replace(/\.[^.]+$/, '.webp'); // Construit le chemin vers la nouvelle image en .webp
+    // webpFilepath n'est qu'un string qui contient le chemin de la future image que sharp va créer
 
-    sharp(filepath)
+    sharp(filepath) // Charge l'image
     .resize(800)
     .webp({ quality: 80 })
-    .toFile(webpFilepath)
-    .then(() => {
-        fs.unlink(filepath, () => {});
-        req.file.filename = filename.replace(/\.[^.]+$/, '.webp');
+    .toFile(webpFilepath) // Sauvegarde le fichier au chemin de webpFilepath
+    .then(() => { // Une fois que c'est fait
+        fs.unlink(filepath, () => {}); // Supprime l'ancien fichier
+        req.file.filename = path.basename(webpFilepath); // Modifie req.file.filename avec le nouveau nom en .webp
         next();
     })
-    .catch((err) => next(err));
-};
+    .catch((err) => { // Si ça échoue
+        fs.unlink(filepath, () => {}); // Supprime le fichier si ce n'était pas une image
+        next(err);
+    });
+}
 
 export default optimizeImage;

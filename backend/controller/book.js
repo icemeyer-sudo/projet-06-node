@@ -3,8 +3,11 @@ import fs from 'fs';
 
 export const createBook = (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
+
+    // Suppression de _id et _userId en cas d'action malveillante
     delete bookObject._id;
     delete bookObject._userId;
+
     const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
@@ -38,26 +41,44 @@ export const getBookById = (req, res, next) => {
 }
 
 export const updateBook = (req, res, next) => {
-    const bookObject = req.file ? {
-        ...JSON.parse(req.body.book),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-    } : { ...req.body };
+    let bookObject;
 
+    if (req.file) {
+        // L'utilisateur a envoyé une nouvelle image
+        const bookData = JSON.parse(req.body.book);
+        bookObject = {
+            ...bookData,
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        };
+    } else {
+        // Pas de nouvelle image, on prend les données telles quelles
+        bookObject = { ...req.body };
+    }
+    // Suppression de _userId en cas d'action malveillante
     delete bookObject._userId;
-    Book.findOne({_id: req.params.id})
+
+    Book.findOne({ _id: req.params.id })
     .then((book) => {
         if (book.userId != req.auth.userId) {
             res.status(401).json({ message: 'Non autorisé'})
         } else {
-            Book.updateOne({ _id: req.params.id}, {...bookObject, _id: req.params.id})
-            .then(() => res.status(200).json({ message: 'Modifié' }))
+            const oldFilename = book.imageUrl.split('/images/')[1];
+            Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+            .then(() => {
+                if (req.file) {
+                    fs.unlink(`images/${oldFilename}`, (err) => {
+                        if (err) console.error('Erreur suppression ancienne image:', err);
+                    });
+                }
+                res.status(200).json({ message: 'Fiche modifiée' });
+            })
             .catch(error => {
-            res.status(400).json({ error })
-    })
+                res.status(400).json({ error });
+            })
         }
     })
     .catch(error => {
-        res.status(400).json({ error })
+        res.status(400).json({ error });
     })
 }
 
@@ -68,11 +89,14 @@ export const deleteBook = (req, res, next) => {
         res.status(401).json({ message: 'Non autorisé'})
         } else {
             const filename = book.imageUrl.split('/images/')[1];
-            fs.unlink(`images/${filename}`, () => {
-                Book.deleteOne({ _id: req.params.id })
-                .then(() => res.status(200).json({ message: 'Supprimé' }))
-                .catch(error => res.status(400).json({ error }));
-            });
+            Book.deleteOne({ _id: req.params.id })
+            .then(() => {
+                fs.unlink(`images/${filename}`, (err) => {
+                    if (err) console.error('Erreur suppression ancienne image:', err);
+                });
+                res.status(200).json({ message: 'Supprimé' });
+            })
+            .catch(error => res.status(400).json({ error }));
         }
     })
     .catch(error => res.status(400).json({ error }));
