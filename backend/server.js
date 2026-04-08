@@ -32,7 +32,12 @@ app.use((req, res, next) => {
 // À supprimer
 app.get("/", (req, res) => {
     res.status(200).send("Hello World");
-    next();
+});
+
+// Permet de gérer les erreurs pendant les middlewares
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(400).json({ error: err.message });
 });
 
 // Obligatoire, permet l'écoute des requêtes entrantes

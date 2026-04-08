@@ -13,10 +13,10 @@ const optimizeImage = (req, res, next) => {
     sharp(filepath) // Charge l'image
     .resize(800)
     .webp({ quality: 80 })
-    .toFile(webpFilepath) // Sauvegarde le fichier au chemin de webpFilepath
+    .toFile(webpFilepath) // Sauvegarde le fichier à l'emplacement défini par webpFilepath
     .then(() => { // Une fois que c'est fait
         fs.unlink(filepath, () => {}); // Supprime l'ancien fichier
-        req.file.filename = path.basename(webpFilepath); // Modifie req.file.filename avec le nouveau nom en .webp
+        req.file.filename = path.basename(webpFilepath); // Modifie req.file.filename avec le chemin du nouveau fichier
         next();
     })
     .catch((err) => { // Si ça échoue

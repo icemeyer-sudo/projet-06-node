@@ -13,7 +13,6 @@ export const createBook = (req, res, next) => {
         userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
-
     book.save()
     .then (() => res.status(201).json({ message: 'Livre créé'}))
     .catch(error => {
@@ -42,7 +41,6 @@ export const getBookById = (req, res, next) => {
 
 export const updateBook = (req, res, next) => {
     let bookObject;
-
     if (req.file) {
         // L'utilisateur a envoyé une nouvelle image
         const bookData = JSON.parse(req.body.book);
@@ -54,9 +52,8 @@ export const updateBook = (req, res, next) => {
         // Pas de nouvelle image, on prend les données telles quelles
         bookObject = { ...req.body };
     }
-    // Suppression de _userId en cas d'action malveillante
+    // Suppression de _userId pour éviter les actions malveillantes
     delete bookObject._userId;
-
     Book.findOne({ _id: req.params.id })
     .then((book) => {
         if (book.userId != req.auth.userId) {
