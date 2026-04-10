@@ -1,18 +1,17 @@
 import mongoose from 'mongoose';
 
 const logsSchema = mongoose.Schema({
-    userId: { type: String, required: true }, // Id de l'utilisateur
-    oldImage: { type: String }, // Nom du fichier remplacé si existe
+    userId: { type: String, required: true },
     bookId: { type: String, required: true },
     action: {
         type: String,
-        enum: ['created', 'updated', 'deleted'],
+        enum: ['created', 'updated', 'deleted', 'deletedImage'],
         required: true
     },
     date: { type: Date, default: Date.now },
     status: {
         type: String,
-        enum: ['in progress', 'done', 'fail'],
+        enum: ['done', 'fail'],
         required: true
     },
 });
