@@ -1,16 +1,21 @@
 import Book from '../model/Book.js';
-import Logs from '../model/Logs.js';
+import { createLog } from '../services/createLog.js';
 
 export async function createBook(req, res, next) {
     const book = extractBookData(req);
-
     try {
-        await Promise.all([
-            createBookInDb(book),
-            createLog(book._id, req, 'created', 'done'),
-        ]);
+        await createBookInDb(book);
+        const dataLog = {
+            userId: req.auth.userId,
+            bookId: book._id,
+            action: 'created',
+            status: 'done',
+            content: null,
+        };
+        createLog(dataLog).catch(error => console.error(error));
         return res.status(201).json({ message: 'Livre créé' });
     } catch(error) {
+        console.error(error);
         return res.status(500).json({ message: 'Le serveur ne répond pas' });
     }
 }
@@ -29,15 +34,4 @@ function extractBookData(req) {
 
 function createBookInDb(book) {
     return book.save();
-}
-
-function createLog(bookId, req, action, status, oldImage = null) {
-    const logs = new Logs({
-        userId: req.auth.userId,
-        bookId: bookId,
-        oldImage: oldImage,
-        action: action,
-        status: status,
-    });
-    return logs.save();
 }

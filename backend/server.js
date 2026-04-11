@@ -3,13 +3,15 @@ import userRoutes from './routes/user.js';
 import bookRoutes from './routes/book.js';
 import cors from 'cors';
 import connect from './db/connect.js'
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { startCleanOrphanImagesCron } from './services/cleanOrphanImages.js';
 
 const port = process.env.PORT || 4000;
 const app = express();
 connect(); // Connexion à la base de donnée
 
-import path from 'path';
-import { fileURLToPath } from 'url';
+startCleanOrphanImagesCron();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

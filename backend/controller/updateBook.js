@@ -1,5 +1,5 @@
 import Book from '../model/Book.js';
-import Logs from '../model/Logs.js';
+import { createLog } from '../services/createLog.js';
 import fs from 'fs';
 
 export async function updateBook(req, res, next) {
@@ -23,10 +23,15 @@ export async function updateBook(req, res, next) {
     const oldFilename = book.imageUrl.split('/images/')[1];
 
     try {
-        await Promise.all([
-            updateBookInDb(req, bookObject),
-            createLog(req, 'updated', 'done'),
-        ]);
+        await updateBookInDb(req, bookObject);
+        const dataLog = {
+            userId: req.auth.userId,
+            bookId: book._id,
+            action: 'updated',
+            status: 'done',
+            content: null,
+        };
+        createLog(dataLog).catch(error => console.error(error));
     } catch(error) {
         console.error(error);
         return res.status(500).json({ message: 'Fiche non modifiée, erreur BDD' });
@@ -66,14 +71,4 @@ function updateBookInDb(req, bookObject) {
         { $set: bookObject },
         { runValidators: true }
     )
-}
-
-function createLog(req, action, status) {
-    const logs = new Logs({
-        userId: req.auth.userId,
-        bookId: req.params.id,
-        action: action,
-        status: status,
-    });
-    return logs.save();
 }
