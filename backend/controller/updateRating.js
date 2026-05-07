@@ -34,7 +34,7 @@ export async function updateRating(req, res, next) {
         };
         createLog(dataLog).catch(error => console.error(error));
 
-        return res.status(200).json({ message: 'Note sauvegardée' });
+        return res.status(200).json(book);
 
     } catch(error) {
         console.error(error);
