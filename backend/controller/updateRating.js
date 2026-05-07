@@ -27,6 +27,7 @@ export async function updateRating(req, res, next) {
         const dataLog = {
             userId: req.auth.userId,
             bookId: book._id,
+            target: 'book',
             action: 'updatedRating',
             status: 'done',
             content: null,

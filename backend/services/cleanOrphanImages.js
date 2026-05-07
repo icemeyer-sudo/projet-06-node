@@ -13,7 +13,8 @@ export function startCleanOrphanImagesCron() {
             for (const log of logs) {
                 const success = await deleteImage(log.content.filename);
                 if(success) {
-                    await deleteLog(log);
+                    log.status = 'done';
+                    await updateLog(log);
                     console.log(log.content.filename + ' is deleted');
                 }
             };
@@ -47,9 +48,9 @@ async function deleteImage(filename) {
     }
 }
 
-async function deleteLog(log) {
+async function updateLog(log) {
     try {
-        await Logs.deleteOne({ _id: log._id });
+        await Logs.updateOne({ _id: log._id });
     } catch(error) {
         console.error(error);
     }

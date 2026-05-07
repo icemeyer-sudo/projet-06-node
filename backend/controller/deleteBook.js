@@ -33,6 +33,7 @@ export async function deleteBook(req, res, next) {
         const dataLog = {
             userId: req.auth.userId,
             bookId: book._id,
+            target: 'book',
             action: 'deleted',
             status: 'done',
             content: null,
@@ -50,6 +51,7 @@ export async function deleteBook(req, res, next) {
         const dataLog = {
             userId: req.auth.userId,
             bookId: book._id,
+            target: 'image',
             action: 'deleted',
             status: 'fail',
             content: {
