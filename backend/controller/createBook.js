@@ -8,6 +8,7 @@ export async function createBook(req, res, next) {
         const dataLog = {
             userId: req.auth.userId,
             bookId: book._id,
+            target: 'book',
             action: 'created',
             status: 'done',
             content: null,

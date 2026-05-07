@@ -1,3 +1,6 @@
+// Permet de gérer l'upload du fichier image
+// uuidv4 permet de renommer l'image pour éviter tout conflit
+
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 

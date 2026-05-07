@@ -27,6 +27,7 @@ export async function updateBook(req, res, next) {
         const dataLog = {
             userId: req.auth.userId,
             bookId: book._id,
+            target: 'book',
             action: 'updated',
             status: 'done',
             content: null,
@@ -42,7 +43,7 @@ export async function updateBook(req, res, next) {
             await fs.promises.unlink(`images/${oldFilename}`);
         } catch(error) {
             console.error(error);
-            await createLog(req, 'deletedImage', 'fail', oldFilename);
+            await createLog(req, 'image', 'deletedImage', 'fail', oldFilename);
         }
     }
 
