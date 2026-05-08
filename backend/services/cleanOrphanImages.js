@@ -6,7 +6,7 @@ export function startCleanOrphanImagesCron() {
 
     // Mettre * * * * *  pour tester toutes les minutes
     // Mettre 0 2 * * * pour tous jours à 2h am
-    cron.schedule('0 2 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         console.log('CRON : Nettoyage des images...');
         try {
             const logs = await failedLogs();
@@ -14,8 +14,7 @@ export function startCleanOrphanImagesCron() {
                 const success = await deleteImage(log.content.filename);
                 if(success) {
                     log.status = 'done';
-                    await updateLog(log);
-                    console.log(log.content.filename + ' is deleted');
+                    await log.save();
                 }
             };
             console.log('CRON : Toutes les images ont été supprimées');
@@ -40,18 +39,10 @@ async function failedLogs() {
 
 async function deleteImage(filename) {
     try {
-        await fs.promises.unlink(`images/${filename}`)
+        await fs.promises.unlink(`./images/${filename}`)
         return true;
     } catch(error) {
         console.error(error);
         return false;
-    }
-}
-
-async function updateLog(log) {
-    try {
-        await Logs.updateOne({ _id: log._id });
-    } catch(error) {
-        console.error(error);
     }
 }

@@ -4,7 +4,7 @@ import { createLog } from '../services/createLog.js';
 export async function createBook(req, res, next) {
     const book = extractBookData(req);
     try {
-        await createBookInDb(book);
+        book.save();
         const dataLog = {
             userId: req.auth.userId,
             bookId: book._id,
@@ -31,8 +31,4 @@ function extractBookData(req) {
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
     return book;
-}
-
-function createBookInDb(book) {
-    return book.save();
 }

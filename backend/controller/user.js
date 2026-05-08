@@ -23,7 +23,7 @@ export const login = (req, res, next) => {
     return User.findOne({email: req.body.email})
     .then(user => {
         if(user === null) {
-            res.status(401).json({ message: 'Paire idenfiant/mdp incorrecte'});
+            res.status(401).json({ message: 'Paire identifiant/mdp incorrecte'});
         } else {
             return bcrypt.compare(req.body.password, user.password)
             .then(valid => {

@@ -15,6 +15,7 @@ async function validateBookYear(req, res, next) {
                 action: 'deleted',
                 status: 'fail',
                 content: {filename: req.file.filename },
+                target: 'book',
             };
             await createLog(dataLog);
         }
